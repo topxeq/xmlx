@@ -121,6 +121,9 @@ func (n Node) GetSubNode(labelsA ...string) *Node {
 
 	for _, term := range labelsA {
 		// fmt.Printf("currentNodeT: %v, currentNodeT.name: %v\n", currentNodeT, currentNodeT.Name)
+		if term == "" {
+			continue
+		}
 
 		foundT := false
 		for _, node := range currentNodeT.Nodes {
@@ -140,6 +143,101 @@ func (n Node) GetSubNode(labelsA ...string) *Node {
 
 }
 
+func (n Node) GetSubNodeX(labelsA string) *Node {
+	labelsT := strings.Split(labelsA, "/")
+
+	if labelsT == nil || len(labelsT) == 0 {
+		return &n
+	}
+
+	currentNodeT := n
+
+	for _, term := range labelsT {
+		// fmt.Printf("currentNodeT: %v, currentNodeT.name: %v\n", currentNodeT, currentNodeT.Name)
+		if term == "" {
+			continue
+		}
+
+		foundT := false
+		for _, node := range currentNodeT.Nodes {
+			if node.Name == term {
+				currentNodeT = node
+				foundT = true
+				break
+			}
+		}
+
+		if !foundT {
+			return nil
+		}
+	}
+
+	return &currentNodeT
+
+}
+
+// GetSubNodeString default/error will return empty
+func (n Node) GetSubNodeString(labelsA ...string) string {
+	if labelsA == nil || len(labelsA) == 0 {
+		return ""
+	}
+
+	currentNodeT := n
+
+	for _, term := range labelsA {
+		// fmt.Printf("currentNodeT: %v, currentNodeT.name: %v\n", currentNodeT, currentNodeT.Name)
+		if term == "" {
+			continue
+		}
+
+		foundT := false
+		for _, node := range currentNodeT.Nodes {
+			if node.Name == term {
+				currentNodeT = node
+				foundT = true
+				break
+			}
+		}
+
+		if !foundT {
+			return ""
+		}
+	}
+
+	return currentNodeT.Data
+
+}
+
+func (n Node) GetSubNodeStringX(labelsA string) string {
+	labelsT := strings.Split(labelsA, "/")
+
+	if labelsT == nil || len(labelsT) == 0 {
+		return ""
+	}
+
+	currentNodeT := n
+
+	for _, term := range labelsT {
+		// fmt.Printf("currentNodeT: %v, currentNodeT.name: %v\n", currentNodeT, currentNodeT.Name)
+
+		foundT := false
+		for _, node := range currentNodeT.Nodes {
+			if node.Name == term {
+				currentNodeT = node
+				foundT = true
+				break
+			}
+		}
+
+		if !foundT {
+			return ""
+		}
+	}
+
+	return currentNodeT.Data
+
+}
+
 func (n Node) SubNodes(labelA string) []Node {
 	if labelA == "" {
 		return n.Nodes
@@ -154,6 +252,200 @@ func (n Node) SubNodes(labelA string) []Node {
 	}
 
 	return bufT
+}
+
+// GetSubNodeBy get a sub-node value of a node, while one other sub-node has the proper value
+func (n Node) GetSubNodeBy(labelA string, subLabelA string, valueA string) *Node {
+
+	nodesT := n.SubNodes(labelA)
+
+	for _, node := range nodesT {
+		subNodeT := node.GetSubNode(subLabelA)
+		if subNodeT == nil {
+			continue
+		}
+
+		if subNodeT.Data == valueA {
+			return &node
+		}
+	}
+
+	return nil
+}
+
+// GetSubNodeStringBy if 1 sub-node has proper value, return the other sub-nodes' value
+func (n Node) GetSubNodeStringBy(labelA string, subLabel1A string, value1A string, subLabel2A string) string {
+
+	nodesT := n.SubNodes(labelA)
+
+	for _, node := range nodesT {
+		subNode1T := node.GetSubNode(subLabel1A)
+		if subNode1T == nil {
+			continue
+		}
+
+		if subNode1T.Data != value1A {
+			continue
+		}
+
+		subNode2T := node.GetSubNode(subLabel2A)
+		if subNode2T == nil {
+			continue
+		}
+
+		return subNode2T.Data
+
+	}
+
+	return ""
+}
+
+// GetSubNodeBy2 get a sub-node value of a node, while two other sub-nodes have the proper value
+func (n Node) GetSubNodeBy2(labelA string, subLabel1A string, value1A string, subLabel2A string, value2A string) *Node {
+
+	nodesT := n.SubNodes(labelA)
+
+	for _, node := range nodesT {
+		subNode1T := node.GetSubNode(subLabel1A)
+		if subNode1T == nil {
+			continue
+		}
+
+		if subNode1T.Data != value1A {
+			continue
+		}
+
+		subNode2T := node.GetSubNode(subLabel2A)
+		if subNode2T == nil {
+			continue
+		}
+
+		if subNode2T.Data != value2A {
+			continue
+		}
+
+		return &node
+	}
+
+	return nil
+}
+
+// GetSubNodeStringBy2 if 2 sub-nodes have proper values, return the other sub-nodes' value
+func (n Node) GetSubNodeStringBy2(labelA string, subLabel1A string, value1A string, subLabel2A string, value2A string, subLabel3A string) string {
+
+	nodesT := n.SubNodes(labelA)
+
+	for _, node := range nodesT {
+		subNode1T := node.GetSubNode(subLabel1A)
+		if subNode1T == nil {
+			continue
+		}
+
+		if subNode1T.Data != value1A {
+			continue
+		}
+
+		subNode2T := node.GetSubNode(subLabel2A)
+		if subNode2T == nil {
+			continue
+		}
+
+		if subNode2T.Data != value2A {
+			continue
+		}
+
+		subNode3T := node.GetSubNode(subLabel3A)
+		if subNode3T == nil {
+			continue
+		}
+
+		return subNode3T.Data
+	}
+
+	return ""
+}
+
+func (n Node) GetSubNodeByX(rootLabesA string, labelA string, labelValuePairA ...string) *Node {
+	rootLabelsT := strings.Split(rootLabesA, "/")
+	rootNodeT := n.GetSubNode(rootLabelsT...)
+
+	if rootNodeT == nil {
+		return nil
+	}
+
+	nodesT := rootNodeT.SubNodes(labelA)
+
+	lenT := len(labelValuePairA) / 2
+
+	for _, node := range nodesT {
+		foundT := false
+		for i := 0; i < lenT; i++ {
+			subNodeT := node.GetSubNodeX(labelValuePairA[i*2])
+			if subNodeT == nil {
+				foundT = true
+				break
+			}
+
+			if subNodeT.Data != labelValuePairA[i*2+1] {
+				foundT = true
+				break
+			}
+
+		}
+
+		if foundT {
+			continue
+		}
+
+		return &node
+
+	}
+
+	return nil
+}
+
+func (n Node) GetSubNodeStringByX(rootLabesA string, labelA string, subLabelA string, labelValuePairA ...string) string {
+	rootLabelsT := strings.Split(rootLabesA, "/")
+	rootNodeT := n.GetSubNode(rootLabelsT...)
+
+	if rootNodeT == nil {
+		return ""
+	}
+
+	nodesT := rootNodeT.SubNodes(labelA)
+
+	lenT := len(labelValuePairA) / 2
+
+	for _, node := range nodesT {
+		foundT := false
+		for i := 0; i < lenT; i++ {
+			subNodeT := node.GetSubNodeX(labelValuePairA[i*2])
+			if subNodeT == nil {
+				foundT = true
+				break
+			}
+
+			if subNodeT.Data != labelValuePairA[i*2+1] {
+				foundT = true
+				break
+			}
+
+		}
+
+		if foundT {
+			continue
+		}
+
+		subNodeT := node.GetSubNodeX(subLabelA)
+		if subNodeT == nil {
+			return ""
+		}
+
+		return subNodeT.Data
+
+	}
+
+	return ""
 }
 
 func (p Node) Text() string {
