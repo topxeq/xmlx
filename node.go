@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Node is a generic XML node.
+// Node is a generic XML node to parse.
 type Node struct {
 
 	// The name of the node
